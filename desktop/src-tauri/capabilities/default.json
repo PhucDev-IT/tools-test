@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "GUI may pick folders/images and reveal the diagnostics folder. It has NO shell permission: only Rust spawns the bundled Agent Core, and the Core accepts a fixed method list.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "opener:allow-reveal-item-in-dir"
+  ]
+}
