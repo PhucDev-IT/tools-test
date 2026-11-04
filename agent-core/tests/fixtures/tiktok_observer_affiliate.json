@@ -1,0 +1,7 @@
+{
+  "account": {"code": 0, "data": {"user_id": "7495962653689350865", "user_type": 3, "user_name": "c.b.thi.trang1"}},
+  "cart": {"code": 0, "data": {"products": [
+    {"product_id": "201", "title": "Lipstick", "seller_info": {"seller_id": "901"}},
+    {"product_id": "202", "title": "Bag", "seller_info": {"seller_id": "902"}}
+  ]}}
+}

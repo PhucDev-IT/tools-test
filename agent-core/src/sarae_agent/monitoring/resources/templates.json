@@ -1,0 +1,258 @@
+{
+  "templates": [
+    {
+      "file": "inactivity_modal_top.png",
+      "role": "warning",
+      "challenge_type": null,
+      "variant": "live_will_end_popup",
+      "domain": "gray",
+      "source": "image1.png",
+      "source_sha256": "5dbb9f343d1c9c246188df13b39b226c2b3d78c3949a0d9f4ac38575456790b4",
+      "crop": [
+        636,
+        170,
+        966,
+        348
+      ],
+      "ignore": [
+        [
+          109,
+          40,
+          224,
+          82
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.75,
+      "unknown_floor": 0.7,
+      "purpose": "INACTIVITY_WARNING: top of the 'LIVE will end in' popup - header, countdown slot (ignored) and the full inactivity paragraph on the popup background."
+    },
+    {
+      "file": "shapes_challenge_popup.png",
+      "role": "challenge",
+      "challenge_type": "SHAPES",
+      "variant": "single_line_prompt",
+      "domain": "gray",
+      "source": "image1.png",
+      "source_sha256": "5dbb9f343d1c9c246188df13b39b226c2b3d78c3949a0d9f4ac38575456790b4",
+      "crop": [
+        636,
+        375,
+        966,
+        660
+      ],
+      "ignore": [
+        [
+          37,
+          39,
+          292,
+          194
+        ],
+        [
+          84,
+          258,
+          254,
+          275
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.75,
+      "unknown_floor": 0.7,
+      "purpose": "CAPTCHA_CHALLENGE/SHAPES: prompt 'Select 2 objects...', canvas frame, Confirm button and Audio footer. Shapes inside the canvas and the audio id are ignored."
+    },
+    {
+      "file": "shapes_challenge_popup_wrapped.png",
+      "role": "challenge",
+      "challenge_type": "SHAPES",
+      "variant": "wrapped_prompt_loading",
+      "domain": "gray",
+      "source": "shapes_captcha_windows.png",
+      "source_sha256": "7b426bfa3607648b44615462d4f60f8320e043850577a675f69ac777a248a9d8",
+      "crop": [
+        762,
+        452,
+        1150,
+        812
+      ],
+      "ignore": [
+        [
+          41,
+          69,
+          350,
+          257
+        ],
+        [
+          98,
+          334,
+          306,
+          352
+        ],
+        [
+          31,
+          12,
+          62,
+          44
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.75,
+      "unknown_floor": 0.7,
+      "purpose": "CAPTCHA_CHALLENGE/SHAPES: layout where the prompt wraps to two lines next to a loading spinner (taller canvas). Canvas content, spinner and audio id are ignored."
+    },
+    {
+      "file": "puzzle_challenge_popup.png",
+      "role": "challenge",
+      "challenge_type": "PUZZLE",
+      "variant": "drag_piece_prompt",
+      "domain": "gray",
+      "source": "puzzle_slide.png",
+      "source_sha256": "829dce5805bdcbeed4535a06ec81d16a6823cd5283de012c570897fbd5362f83",
+      "crop": [
+        495,
+        358,
+        840,
+        645
+      ],
+      "ignore": [
+        [
+          38,
+          40,
+          306,
+          203
+        ],
+        [
+          87,
+          265,
+          267,
+          282
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.75,
+      "unknown_floor": 0.7,
+      "purpose": "CAPTCHA_CHALLENGE/PUZZLE: prompt 'Drag the puzzle piece into place', picture frame, slider with arrow knob and Audio footer. Picture and audio id are ignored."
+    },
+    {
+      "file": "shapes_challenge_component.png",
+      "role": "challenge",
+      "challenge_type": "SHAPES",
+      "variant": "canvas_and_confirm",
+      "domain": "gray",
+      "source": "image1.png",
+      "source_sha256": "5dbb9f343d1c9c246188df13b39b226c2b3d78c3949a0d9f4ac38575456790b4",
+      "crop": [
+        664,
+        406,
+        937,
+        623
+      ],
+      "ignore": [
+        [
+          9,
+          8,
+          264,
+          163
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.8,
+      "unknown_floor": null,
+      "purpose": "CAPTCHA_CHALLENGE/SHAPES without surrounding popup text: canvas frame directly above the Confirm button. No grey zone: a lone rectangle with a button is too generic for UNKNOWN."
+    },
+    {
+      "file": "puzzle_challenge_component.png",
+      "role": "challenge",
+      "challenge_type": "PUZZLE",
+      "variant": "canvas_and_slider",
+      "domain": "gray",
+      "source": "puzzle_slide.png",
+      "source_sha256": "829dce5805bdcbeed4535a06ec81d16a6823cd5283de012c570897fbd5362f83",
+      "crop": [
+        525,
+        390,
+        809,
+        615
+      ],
+      "ignore": [
+        [
+          8,
+          8,
+          276,
+          171
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.8,
+      "unknown_floor": null,
+      "purpose": "CAPTCHA_CHALLENGE/PUZZLE without surrounding popup text: picture frame directly above the slider bar and knob."
+    },
+    {
+      "file": "puzzle_challenge_large.png",
+      "role": "challenge",
+      "challenge_type": "PUZZLE",
+      "variant": "large_canvas_and_slider",
+      "domain": "gray",
+      "source": "resources/puzzle_template_large.png",
+      "source_sha256": "6190b080ad3cdae70e73e48d49a02d0cbc03e15e1648c2a4b119d34bd776ab8f",
+      "crop": [
+        0,
+        0,
+        362,
+        290
+      ],
+      "ignore": [
+        [
+          13,
+          13,
+          347,
+          215
+        ]
+      ],
+      "bands": [],
+      "min_score": 0.8,
+      "unknown_floor": null,
+      "purpose": "CAPTCHA_CHALLENGE/PUZZLE, large layout supplied by the reference solver (not covered by the screenshots): picture frame and slider. Picture is ignored."
+    },
+    {
+      "file": "puzzle_verify_box_edges.png",
+      "role": "challenge",
+      "challenge_type": "PUZZLE",
+      "variant": "verify_to_continue_box",
+      "domain": "edges",
+      "source": "test_extracted_captcha_box.png",
+      "source_sha256": "f1ba822102aa708d4d706e36d5bf9edda1ab91d7699c273984c2dd4ace1b1491",
+      "crop": [
+        0,
+        0,
+        391,
+        398
+      ],
+      "ignore": [
+        [
+          26,
+          76,
+          362,
+          286
+        ],
+        [
+          70,
+          350,
+          280,
+          368
+        ]
+      ],
+      "bands": [
+        [
+          20,
+          68,
+          368,
+          338,
+          7
+        ]
+      ],
+      "min_score": 0.75,
+      "unknown_floor": 0.7,
+      "purpose": "CAPTCHA_CHALLENGE/PUZZLE 'Verify to continue:' box without the inactivity popup. The only supplied sample is an edge map, so it is matched in the same edge domain. Picture, id and the debug rectangle drawn by the reference solver are ignored."
+    }
+  ]
+}

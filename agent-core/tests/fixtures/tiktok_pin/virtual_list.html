@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><title>LIVE Console products (virtual list)</title>
+<style>body{margin:0;font:14px sans-serif} #list{height:400px;overflow-y:auto;position:relative;width:600px}</style></head>
+<body>
+<!-- A tiny imitation of the LIVE Console product list, for tests/test_pin_virtual_list_playwright.py.
+     Like the real Console the list is virtual: only cards near the visible part are in the page (absolute rows of
+     190px); card shape copied from the Console. Ghim / Bỏ ghim takes effect after window.PIN_DELAY_MS (TikTok answers
+     late); a click while a change is pending is recorded in window.DOUBLE_CLICKS. -->
+<div id="list"><div id="spacer" style="position:relative"></div></div>
+<script>
+  window.PIN_DELAY_MS = 1500;
+  window.CLICKS = [];
+  window.DOUBLE_CLICKS = 0;
+  const names = ["Áo Sơ Mi Mộc Miên Cổ V Phối Cúc - ST Design - SKU 120",
+    "Set bộ thể thao áo polo tay hến + chân váy chất umi lạnh - ST Design _ SKU 84",
+    "Áo sơ mi thiết kế tiểu thư phối cổ preppy chất kẻ Oxford,sơ mi back to school  - ST Design- SKU 26",
+    "Áo Sơ Mi Nữ Chiết Eo Màu Trắng ngà - SKU 33", "Áo Thun Nữ Trễ Vai Tay Dài - SKU 5",
+    "Áo sơ mi Phiên bản dài tay đai eo tiểu thư,sơ mi back to school  - ST Design - SKU 10 somi hot sơ  minu Nữ Women",
+    "Set đồ ngủ nữ 2 dây cao cấp - SKU 8", "Áo Mesh Hở Vai Nữ In Sao Pastel - SKU 6"];
+  const products = names.map((name, i) => ({name, price: (219 + i) + ".000₫", pinned: location.hash === "#pinned-last" && i === 7}));
+  let pending = false;
+  const ROW = 190, list = document.getElementById("list"), spacer = document.getElementById("spacer");
+  spacer.style.height = (products.length * ROW) + "px";
+  function card(p, i) {
+    return `<div style="position:absolute;left:0;top:${i * ROW}px;height:${ROW}px;width:100%"><div><div class="rounded-4 mb-8">`
+      + `<div class="flex"><div class="flex flex-1 overflow-hidden"><div class="relative mr-8 w-70 h-70"><img src="https://img.example/p${i}.jpg" width="70" height="70"></div>`
+      + `<div class="flex-1 overflow-hidden"><div class="text-body-m-regular mb-4"><span></span></div>`
+      + `<div class="mb-4 flex items-center"><div class="inline-flex items-center"><span class="text-body-l-medium"> ${p.price}</span>`
+      + `<div class="flex items-center"><span class="ml-4">359.000₫</span></div></div></div>`
+      + `<div><span>Còn: 3,4K</span><div class="inline-flex"><button data-i="${i}" type="button" class="arco-btn m4b-button ${p.pinned ? "pc_pin_product_unpin" : "pc_pin_product_pin"}">`
+      + `<svg width="14" height="14"></svg><div>${p.pinned ? "Bỏ ghim" : "Ghim"}</div></button></div></div></div></div></div></div></div>`;
+  }
+  const rows = new Map();  // like React with keys: a row stays the same element while it is rendered
+  function render() {  // only the rows within the visible part, plus one row above and below
+    const first = Math.max(0, Math.floor(list.scrollTop / ROW) - 1);
+    const last = Math.min(products.length - 1, Math.floor((list.scrollTop + list.clientHeight) / ROW) + 1);
+    for (const [i, el] of rows) if (i < first || i > last) { el.remove(); rows.delete(i); }
+    for (let i = first; i <= last; i++) {
+      if (!rows.has(i)) {
+        const holder = document.createElement("div");
+        holder.innerHTML = card(products[i], i);
+        const el = holder.firstElementChild;
+        el.querySelector(".text-body-m-regular span").textContent = products[i].name;
+        spacer.appendChild(el);
+        rows.set(i, el);
+      }
+      const b = rows.get(i).querySelector("button");  // pin state updated in place
+      b.className = "arco-btn m4b-button " + (products[i].pinned ? "pc_pin_product_unpin" : "pc_pin_product_pin");
+      b.querySelector("div").textContent = products[i].pinned ? "Bỏ ghim" : "Ghim";
+    }
+  }
+  list.addEventListener("scroll", render);
+  spacer.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const i = +b.dataset.i;
+    window.CLICKS.push(i);
+    if (pending) { window.DOUBLE_CLICKS++; return; }
+    pending = true;
+    setTimeout(() => {
+      const pin = !products[i].pinned;
+      products.forEach((p) => { p.pinned = false; });
+      products[i].pinned = pin;
+      pending = false;
+      render();
+    }, window.PIN_DELAY_MS);
+  });
+  render();
+</script>
+</body></html>

@@ -1,0 +1,7 @@
+{
+  "account": {"code": 0, "data": {"user_id": "7494647113328657914", "user_type": 1, "user_name": "sarae.fashion3"}},
+  "cart": {"code": 0, "data": {"products": [
+    {"product_id": "101", "title": "Shirt", "seller_info": {"seller_id": "900"}},
+    {"product_id": "102", "title": "Hat", "seller_info": {"seller_id": "900"}}
+  ]}}
+}

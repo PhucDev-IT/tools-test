@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sarae-agent-core"
+version = "0.3.0"
+description = "Sarae Windows Agent Core: local OBS, media, CAPTCHA monitor and Cloud transport (no UI)"
+requires-python = ">=3.11,<3.14"
+# Agent-only runtime dependencies. The Cloud server (backend/) never installs these.
+# Win32 access (DPAPI, windows, mutex) uses ctypes, so pywin32 is not required.
+dependencies = [
+    "httpx>=0.27,<1",
+    "pydantic>=2.7,<3",
+    "obsws-python>=1.7,<2",
+    "psutil>=5.9,<8",
+    "mss>=9,<11",
+    "numpy>=1.26,<3",
+    "opencv-python-headless>=4.9,<5",
+    "edge-tts>=6.1,<8",
+    "playwright>=1.55,<2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "pyinstaller>=6.6,<7"]
+
+[project.scripts]
+sarae-agent-core = "sarae_agent.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"sarae_agent.monitoring" = ["resources/*.png", "resources/templates.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

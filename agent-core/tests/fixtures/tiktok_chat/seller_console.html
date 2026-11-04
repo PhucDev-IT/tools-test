@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>LIVE Console chat (seller_console)</title></head>
+<body>
+<!-- Another m4b textarea elsewhere on the Console: must never be taken for the chat composer. -->
+<div class="product-search"><p>Products</p><textarea data-tid="m4b_input_textarea" placeholder="Type something..."></textarea></div>
+
+<!-- The "Chat" panel as copied from the real LIVE Console (svg paths and tracking attributes trimmed). -->
+<div class="h-full w-full pb-12 flex flex-col relative"><div data-btm="c1957" class="w-full"><div class="flex items-center justify-between px-16 py-10"><p class="text-neutral-text1 text-head-s">Chat</p></div><div class="flex justify-between items-center"><div class="px-16 pt-4 pb-8 flex gap-1"><div class="styles-module__tabBtn--jtS+u styles-module__active--vtjcq"><div>All</div></div><div class="styles-module__tabBtn--jtS+u"><div>Product related</div></div></div></div></div>
+<div class="w-full pt-16 gap-8 overflow-y-hidden relative min-h-0 flex-grow"><div class="arco-list-wrapper"><div class="arco-list arco-list-default pl-12"><div role="list" class="arco-list-content arco-list-virtual"><div><div id="rows" style="display: flex; flex-direction: column;"><div id="empty" class="text-center">Viewer comments will appear here during your LIVE.</div></div></div></div></div></div></div>
+<div class="w-full px-12 mt-12"><div class="flex w-full"><div class="flex-1 relative"><div class="absolute top-0 bottom-0 text-right flex items-center z-10 w-fit right-10"><div class="text-12 index-module__length--l7Ik4">0/100</div><span id="send" class="text-16 flex items-center ml-6 text-neutral-text3 cursor-not-allowed"><span class="index-module__icon--VT8YX"><svg class="arco-icon arco-icon-publish " width="1em" height="1em" viewBox="0 0 16 16"><path d="M1 1h14L8 14z"></path></svg></span></span></div><textarea data-tid="m4b_input_textarea" maxlength="100" class="arco-textarea m4b-input-textarea m4b-input-textarea-mini" placeholder="Type something..."></textarea></div></div></div></div>
+
+<script>
+  // Behaviour: Send is "cursor-not-allowed" while the box is empty; Enter or Send posts the text as a comment row.
+  // ?rows=1 starts with real-shaped comment rows plus a "just joined" row (which is not a comment).
+  // Hovering a comment shows the real popup [reply ↩ | pin 📌 | more …]; reply pre-fills "@username "
+  // (?prefill=other pre-fills someone else). Any pin / more click is recorded in window.FORBIDDEN.
+  // Like the real Console the popup is ONE element outside the rows, placed over the hovered row; ?popup=inside puts
+  // a popup inside each row instead.
+  window.SENT = [];
+  window.FORBIDDEN = [];
+  const box = document.querySelector(".m4b-input-textarea-mini");
+  const send = document.getElementById("send");
+  const list = document.getElementById("rows");
+  function sync() { send.classList.toggle("cursor-not-allowed", !box.value.trim()); }
+  const icon = (name) => '<div class="w-24 h-24 rounded-4 bg-white shadow-downM"><button data-tid="m4b_button" '
+    + 'class="arco-btn arco-btn-text arco-btn-icon-only m4b-button" type="button" data-act="' + name + '">'
+    + '<svg class="arco-icon arco-icon-' + name + ' " width="16" height="16" viewBox="0 0 16 16"><path d="M1 1h14v14H1z"></path></svg>'
+    + '</button></div>';
+  function addRow(nick, text, user) {  // shape copied from a real LIVE Console comment
+    document.getElementById("empty")?.remove();
+    const row = document.createElement("div");
+    row.className = "rounded-8 relative hover:bg-[#F5F5F5] cursor-pointer mr-6 p-4 mt-4";
+    row.innerHTML = '<div class="flex gap-4 items-center mb-2"><div data-tid="m4b_avatar" class="m4b-avatar"></div>'
+      + '<div class="text-body-s-medium text-neutral-text3 truncate"><div><div class="nick"></div></div></div></div>'
+      + '<div class="text-neutral-text1 pl-32 text-body-s-regular"></div>';
+    row.querySelector(".nick").textContent = nick;
+    row.querySelector(".pl-32").textContent = text;
+    if (user && location.search.includes("popup=inside")) {
+      const popup = makePopup(() => user);
+      popup.className = "absolute top-0 right-0";
+      row.appendChild(popup);
+      row.addEventListener("mouseenter", () => { popup.style.display = ""; });
+      row.addEventListener("mouseleave", () => { popup.style.display = "none"; });
+    } else if (user) {
+      row.addEventListener("mouseenter", () => {
+        shared.user = user;
+        const r = row.getBoundingClientRect();
+        Object.assign(shared.style, {display: "", top: (r.top + window.scrollY) + "px", left: (r.right - 90) + "px"});
+      });
+      row.addEventListener("mouseleave", (e) => { if (!shared.contains(e.relatedTarget)) shared.style.display = "none"; });
+    }
+    list.appendChild(row);
+  }
+  function makePopup(user) {
+    const popup = document.createElement("div");
+    popup.style.display = "none";
+    popup.innerHTML = '<div class="flex items-center gap-8">' + icon("recover") + icon("pin")
+      + '<div class="m4b-dropdown" data-tid="m4b_dropdown">' + icon("more") + '</div></div>';
+    popup.addEventListener("click", (e) => {
+      const act = e.target.closest("button")?.dataset.act;
+      if (act !== "recover") { window.FORBIDDEN.push(act); return; }
+      const other = location.search.includes("prefill=other");
+      box.value = "@" + (other ? "someone.else" : user()) + " ";
+      sync();
+      box.focus();
+    });
+    return popup;
+  }
+  const shared = makePopup(() => shared.user);
+  shared.style.position = "absolute";
+  shared.addEventListener("mouseleave", () => { shared.style.display = "none"; });
+  document.body.appendChild(shared);
+  function addJoin(nick) {
+    document.getElementById("empty")?.remove();
+    const row = document.createElement("div");
+    row.setAttribute("type", "view_filter");
+    row.className = "flex pl-4 pr-16 mr-10 mb-4 gap-8 rounded-l-24 items-center relative max-w-full";
+    row.innerHTML = '<div class="self-start"><div data-tid="m4b_avatar" class="m4b-avatar"></div></div>'
+      + '<div class="leading-none h-fit flex-1"><span class="text-neutral-text1">'
+      + '<div data-tid="m4b_overflow_text_signle"></div>just joined</span></div>';
+    row.querySelector("[data-tid=m4b_overflow_text_signle]").textContent = nick;
+    list.appendChild(row);
+  }
+  if (location.search.includes("rows=1")) {
+    addRow("Lan", "55kg mặc size gì", "lan.nguyen");
+    addJoin("Hoa");
+    addRow("Hoa", "ship bao lâu vậy shop", "hoa.tran");
+  }
+  function post() {
+    if (!box.value.trim()) return;
+    window.SENT.push(box.value);
+    addRow("Shop", box.value);
+    box.value = "";
+    sync();
+  }
+  box.addEventListener("input", sync);
+  box.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); post(); } });
+  send.addEventListener("click", post);
+</script>
+</body></html>
