@@ -39,6 +39,7 @@ const SLOW_METHODS: Partial<Record<MethodName, number>> = {
   'agent.stop': 30_000,
   'agent.restart': 40_000,
   'monitor.stop': 15_000,
+  'monitor.sadcaptcha.analyze': 30_000,
 }
 
 type CallArgs<M extends MethodName> = Record<never, never> extends MethodParams<M> ? [params?: MethodParams<M>] : [params: MethodParams<M>]

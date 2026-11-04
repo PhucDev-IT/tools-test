@@ -3,7 +3,7 @@ import { LogOut, Settings2 } from 'lucide-react'
 import { useApp } from '../../app/store'
 import { ActionButton, Input, Toggle } from '../../app/ui'
 import { call } from '../../services/core'
-import type { MethodParams, TemplateInfo } from '../../types/ipc'
+import type { MethodParams, TemplateInfo, SadCaptchaStatus, SadCaptchaAnalysis } from '../../types/ipc'
 
 /** Rarely changed, folded by default: startup behaviour, OBS connection, this device. */
 export function Settings() {
@@ -20,10 +20,28 @@ export function Settings() {
   const [sourceB, setSourceB] = useState('')
   const [cameraInput, setCameraInput] = useState('')
   const [templates, setTemplates] = useState<TemplateInfo[]>([])
+  const [sadStatus, setSadStatus] = useState<SadCaptchaStatus | null>(null)
+  const [sadKey, setSadKey] = useState('')
+  const [sadKind, setSadKind] = useState<'shapes' | 'puzzle'>('shapes')
+  const [sadImage, setSadImage] = useState('')
+  const [sadPiece, setSadPiece] = useState('')
+  const [sadResult, setSadResult] = useState<SadCaptchaAnalysis | null>(null)
 
   useEffect(() => {
     void call('monitor.templates.list').then(result => setTemplates(result.templates)).catch(() => undefined)
+    void call('monitor.sadcaptcha.status').then(setSadStatus).catch(() => undefined)
   }, [agent?.state])
+
+  const loadImage = async (file?: File) => {
+    if (!file) return ''
+    if (file.size > 680_000) throw new Error('Ảnh quá lớn: tối đa 680 KB')
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onerror = () => reject(new Error('Không đọc được ảnh'))
+      reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
+      reader.readAsDataURL(file)
+    })
+  }
 
   const uploadTemplate = async (name: string, file?: File) => {
     if (!file) return
@@ -94,6 +112,43 @@ export function Settings() {
             </label>
           ))}
         </details>
+      </div>
+
+      <div className="settings-group">
+        <h3>SadCaptcha — phân tích API (thử nghiệm 25 lượt)</h3>
+        <p className="muted small">Phân tích ảnh CAPTCHA đã crop theo yêu cầu của người vận hành; không tự điều khiển TikTok. Ảnh được gửi trực tiếp từ máy này đến SadCaptcha, không qua Sarae Cloud.</p>
+        <p className="muted small">{sadStatus?.key_configured ? "API key đã lưu bằng Windows DPAPI" : "Chưa có API key"} · Đã gửi {sadStatus?.attempts ?? 0}/{sadStatus?.max_attempts ?? 25} yêu cầu (bộ đếm local, không phải số credit chính thức)</p>
+        <div className="inline">
+          <Input type="password" value={sadKey} onChange={e => setSadKey(e.target.value)} placeholder="SadCaptcha API key" autoComplete="off" />
+          <ActionButton disabled={!sadKey.trim()} onAction={async () => {
+            const result = await run(() => call("monitor.sadcaptcha.set_key", { api_key: sadKey }), "Đã lưu SadCaptcha API key")
+            if (result) { setSadStatus(result); setSadKey("") }
+          }}>Lưu API key</ActionButton>
+          <ActionButton disabled={!sadStatus?.key_configured} onAction={async () => {
+            const result = await run(() => call("monitor.sadcaptcha.clear_key"), "Đã xoá SadCaptcha API key")
+            if (result) setSadStatus(result)
+          }}>Xoá key</ActionButton>
+        </div>
+        <div className="inline">
+          <label>Loại thử thách <select value={sadKind} onChange={e => setSadKind(e.target.value as "shapes" | "puzzle")}>
+            <option value="shapes">Shapes</option><option value="puzzle">Puzzle</option>
+          </select></label>
+          <label>Ảnh CAPTCHA đã crop <input type="file" accept="image/png,image/jpeg" onChange={async e => {
+            try { setSadImage(await loadImage(e.target.files?.[0])) } catch (err) { setSadImage(""); window.alert(String(err)) }
+          }} /></label>
+          {sadKind === "puzzle" && <label>Ảnh mảnh ghép <input type="file" accept="image/png,image/jpeg" onChange={async e => {
+            try { setSadPiece(await loadImage(e.target.files?.[0])) } catch (err) { setSadPiece(""); window.alert(String(err)) }
+          }} /></label>}
+        </div>
+        <ActionButton disabled={!sadStatus?.key_configured || !sadImage || (sadKind === "puzzle" && !sadPiece) || (sadStatus?.remaining_local_budget ?? 0) < 1}
+          onAction={async () => {
+            if (!window.confirm("Gửi ảnh CAPTCHA đến SadCaptcha API thật? Có thể tiêu hao credit.")) return
+            const result = await run(() => call("monitor.sadcaptcha.analyze", { kind: sadKind, image_base64: sadImage, ...(sadKind === "puzzle" ? { piece_image_base64: sadPiece } : {}) }), "Đã nhận phân tích SadCaptcha")
+            if (result) setSadResult(result)
+            const status = await call("monitor.sadcaptcha.status").catch(() => null)
+            if (status) setSadStatus(status)
+          }}>Phân tích thật (có thể tốn credit)</ActionButton>
+        {sadResult && <pre className="muted small" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{JSON.stringify(sadResult, null, 2)}</pre>}
       </div>
 
       <div className="settings-group">

@@ -32,6 +32,7 @@ from sarae_agent.logging_setup import event_handler
 from sarae_agent.media.cloud_cache import CloudMediaCache, cache_dir, cached_path
 import httpx
 from sarae_agent.monitoring.captcha import CaptchaMonitor
+from sarae_agent.monitoring.sadcaptcha import SadCaptchaAnalyzer
 from sarae_agent.obs.controller import ObsController, ObsSettingsStore
 from sarae_agent.overlay.cache import OverlayCache
 from sarae_agent.overlay.service import OverlayService
@@ -88,6 +89,7 @@ class AgentRuntime:
                                      store=ObsSettingsStore(self.config, self.obs))
         self.playback = PlaybackService(self.engine, self.emit)
         self.monitor = CaptchaMonitor(self.config, self.emit)
+        self.sadcaptcha = SadCaptchaAnalyzer()
         self.voice = VoiceService(self.config, self.obs)
         from sarae_agent.voice.omnivoice import OmniVoiceProvider
         self.voice.job_provider = OmniVoiceProvider(self._cloud)

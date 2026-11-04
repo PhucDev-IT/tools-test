@@ -231,6 +231,24 @@ export interface TemplateInfo {
   status: 'Ready' | 'Missing' | 'Invalid'
 }
 
+export interface SadCaptchaStatus {
+  key_configured: boolean
+  attempts: number
+  remaining_local_budget: number
+  max_attempts: number
+  last: SadCaptchaAnalysis | null
+}
+
+export interface SadCaptchaAnalysis {
+  kind: 'shapes' | 'puzzle'
+  state: 'REQUESTED' | 'FAILED' | 'ANALYSIS_READY'
+  attempt: number
+  duration_ms?: number
+  result?: Record<string, number>
+  error?: string
+  remaining_local_budget?: number
+}
+
 export type Voice = 'vi-VN-HoaiMyNeural' | 'vi-VN-NamMinhNeural'
 
 type NoParams = Record<never, never>
@@ -289,6 +307,10 @@ export interface CoreMethods {
   'monitor.templates.list': [NoParams, { templates: TemplateInfo[] }]
   'monitor.templates.set_custom': [{ name: string; image_base64: string }, { templates: TemplateInfo[] }]
   'monitor.templates.reset': [{ name: string }, { templates: TemplateInfo[] }]
+  'monitor.sadcaptcha.status': [NoParams, SadCaptchaStatus]
+  'monitor.sadcaptcha.set_key': [{ api_key: string }, SadCaptchaStatus]
+  'monitor.sadcaptcha.clear_key': [NoParams, SadCaptchaStatus]
+  'monitor.sadcaptcha.analyze': [{ kind: 'shapes' | 'puzzle'; image_base64: string; piece_image_base64?: string }, SadCaptchaAnalysis]
   'voice.speak': [{ text: string; voice?: Voice; rate?: number; duck?: boolean; intro?: string }, { status: string; id: string; position: number; source: string; voice: string; chars: number }]
   'voice.clear': [NoParams, { cleared: number; stopped: boolean }]
   'voice.status': [NoParams, { queue: number; prepare_pending: number; speaking: string | null; ducked: boolean; stats: Record<string, number>; last: Record<string, unknown> | null }]

@@ -74,6 +74,16 @@ class ResetTemplateParams(Strict):
     name: str = Field(min_length=1, max_length=80)
 
 
+class SadCaptchaKeyParams(Strict):
+    api_key: str = Field(min_length=8, max_length=256)
+
+
+class SadCaptchaAnalysisParams(Strict):
+    kind: Literal['shapes', 'puzzle']
+    image_base64: str = Field(min_length=1, max_length=910_000)
+    piece_image_base64: str | None = Field(default=None, max_length=910_000)
+
+
 class SpeakParams(Strict):
     text: str = Field(min_length=1, max_length=450)
     voice: str = Field(default="vi-VN-HoaiMyNeural", min_length=1, max_length=100)
@@ -203,6 +213,11 @@ def register_all(server: IpcServer, rt: AgentRuntime) -> None:
     reg("monitor.templates.list", lambda _: {"templates": rt.monitor.templates()})
     reg("monitor.templates.set_custom", lambda p: rt.monitor.set_custom_template(p.name, p.image_base64), CustomTemplateParams)
     reg("monitor.templates.reset", lambda p: rt.monitor.reset_custom_template(p.name), ResetTemplateParams)
+    # Operator-initiated SadCaptcha analysis. Never expose these as Cloud commands.
+    reg("monitor.sadcaptcha.status", lambda _: rt.sadcaptcha.status())
+    reg("monitor.sadcaptcha.set_key", lambda p: rt.sadcaptcha.set_api_key(p.api_key), SadCaptchaKeyParams)
+    reg("monitor.sadcaptcha.clear_key", lambda _: rt.sadcaptcha.clear_api_key())
+    reg("monitor.sadcaptcha.analyze", lambda p: rt.sadcaptcha.analyze(p.kind, p.image_base64, p.piece_image_base64), SadCaptchaAnalysisParams)
 
     # voice
     reg("voice.speak", lambda p: rt.voice.speak(p.text, p.voice, rate=p.rate, duck=p.duck, intro=p.intro,
